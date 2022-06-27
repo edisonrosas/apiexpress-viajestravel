@@ -430,9 +430,12 @@ exports.loginUser = (req, res, next) => {
               _id: users[0]._id,
               token: "Bearer " + token,
             };
-            jsonuser.user = user;
+            req.user = user
+            //console.log("userdata01",jsonuser)
             next();
-            return;
+            //res.send();
+            //console.log("userdata02",jsonuser)
+            return ;
           }
           return res.status(400).json({ message: "Credenciales incorrectas" });
         });
@@ -444,13 +447,17 @@ exports.loginUser = (req, res, next) => {
     });
 };
 exports.sendUserData = (req, res) => {
+  //console.log("2sudd",req.body)
+  //console.log("sud",req);
+  //console.log("ud",req.user)
   try{
     jsonuser = JSON.parse(req.body);
 
   }catch (error){
     jsonuser = req.body
   }
-  return res.status(200).json({ user: jsonuser.user });
+  //console.log(req.user)
+  return res.status(200).json({ user: req.user });
 };
 
 exports.deleteUser = (req, res) => {
@@ -524,8 +531,18 @@ exports.updateUser = (req, res) => {
 };
 
 exports.getUserData = (req, res, next) => {
+  //console.log("1f ",req.body)
+  //console.log("un id ",req.userData.userId)
+  try{
+    jsonuser = JSON.parse(req.body);
+
+  }catch (error){
+    jsonuser = req.body
+  }
+  //console.log("2dasdasd",jsonuser.profilePage)
+ 
   let q;
-  if (req.body.profilePage) {
+  if (jsonuser.profilePage) {
     q = [
       { $match: { _id: mongoose.Types.ObjectId(req.userData.userId) } },
       {
@@ -627,10 +644,14 @@ exports.getUserData = (req, res, next) => {
         messagesCount: values[3],
         allNotifications: values[4],
       };
-
-      req.body.user = data;
-
+     
+      req.user = data;    
+      //console.log(req);  
       next();
+      //res.send();
+      //console.log("userdata"+ jsonuser);
+      //console.log("userdata2"+ jsonuser.user);
+      //return;
     })
     .catch((err) => {
       return res.status(500).json({
@@ -745,6 +766,8 @@ exports.followUser = (req, res) => {
 };
 
 exports.getNewUsers = (req, res) => {
+  //console.log("rq",req.body)
+  //console.log("rqi",req.body.initialFetch)
   if (req.body.initialFetch) {
     const usersCount = User.find({}).countDocuments();
     const users = User.find()
@@ -909,10 +932,20 @@ exports.getPosts = (req, res) => {
 };
 
 exports.getUserPosts = (req, res, next) => {
-  if (req.body.profilePage) {
+  //console.log("upp", req.body)
+  try{
+    jsonuser = JSON.parse(req.body);
+
+  }catch (error){
+    jsonuser = req.body
+  }
+  //console.log("upjson",jsonuser.user)
+  //console.log("gud",req.user._id)
+  //console.log(jsonuser.profilePage)
+  if (jsonuser.profilePage) {
     Post.aggregate([
       {
-        $match: { author: mongoose.Types.ObjectId(req.body.user._id) },
+        $match: { author: mongoose.Types.ObjectId(req.user._id) },
       },
       { $sort: { createdAt: -1 } },
       { $limit: 10 },
@@ -959,8 +992,10 @@ exports.getUserPosts = (req, res, next) => {
       },
     ])
       .then((posts) => {
-        req.body.user.posts = posts;
+        //console.log("todo ok")
+        req.user.posts = posts;
         next();
+        //res.send()
       })
       .catch((err) => {
         console.log(err);
@@ -972,6 +1007,7 @@ exports.getUserPosts = (req, res, next) => {
 };
 
 exports.searchUsersByUsername = (req, res) => {
+  //console.log(req.body);
   if (req.body.q) {
     User.find({
       $or: [
@@ -990,6 +1026,8 @@ exports.searchUsersByUsername = (req, res) => {
 };
 
 exports.getFollowings = (req, res, next) => {
+
+  console.log("ud",req.userData)
   User.aggregate([
     { $match: { _id: mongoose.Types.ObjectId(req.userData.userId) } },
 
@@ -1009,6 +1047,7 @@ exports.getFollowings = (req, res, next) => {
     },
   ])
     .then((user) => {
+      console.log("usuario",user)
       req.body.followings = user[0].followings;
       next();
     })

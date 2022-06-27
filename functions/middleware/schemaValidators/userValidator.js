@@ -50,7 +50,7 @@ exports.addUser = (req, res, next) => {
   //  allowUnknown: true, // ignore unknown props
    // stripUnknown: true // remove unknown props
   };*/
-  console.log(req.body)
+  //console.log(req.body)
   //const { error, value } = schema.validate( JSON.parse(req.body));
   //const { error, value } = schema.validate( req.body);
 
@@ -58,7 +58,7 @@ exports.addUser = (req, res, next) => {
     const { error, value } = schema.validate( JSON.parse(req.body));
     
     if (error) {
-      console.log(error);
+      //console.log(error);
      // console.log(res.status(400).json({ message: error.message }));
   
       return res.status(400).json({ message: error.message });
@@ -68,7 +68,7 @@ exports.addUser = (req, res, next) => {
   }catch (err){
     const { error, value } = schema.validate( req.body);
     if (error) {
-      console.log(error);
+      //console.log(error);
      // console.log(res.status(400).json({ message: error.message }));
   
       return res.status(400).json({ message: error.message });
@@ -180,11 +180,21 @@ exports.getUserData = (req, res, next) => {
     profilePage: Joi.boolean().required(),
     userProfile: Joi.boolean().required(),
   });
+  try{
+    const { error, value } = schema.validate( JSON.parse(req.body));
 
-  const { error, value } = schema.validate(req.body);
-  if (error) {
-    return res.status(400).json({ message: error.message });
+    if (error) {
+      //console.log(error);
+      return res.status(400).json({ message: error.message });
+    }
+
+  }catch (err){
+    const { error, value } = schema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ message: error.message });
+    }
   }
+ 
   next();
 };
 
@@ -295,11 +305,23 @@ exports.searchByUsername = (req, res, next) => {
     q: Joi.string().required(),
   });
 
-  const { error, value } = schema.validate(req.body);
-  if (error) {
-    return res.status(400).json({ message: error.message });
+  try{
+    const { error, value } = schema.validate(JSON.parse(req.body));
+    if (error) {
+      return res.status(400).json({ message: error.message });
+    }
+
+  }catch (err){
+    const { error, value } = schema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ message: error.message });
+    }
   }
+
+
   next();
+
+
 };
 
 exports.followUser = (req, res, next) => {

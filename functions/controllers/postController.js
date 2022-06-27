@@ -66,7 +66,7 @@ function arrayRemove(array, value) {
 const storage = multer.diskStorage({
   //multers disk storage settings
   destination: (req, file, cb) => {
-    cb(null, "./public/images/post-images/");
+    cb(null, "../public/images/post-images/");
   },
   filename: (req, file, cb) => {
     const ext = file.mimetype.split("/")[1];
@@ -88,18 +88,29 @@ const upload = multer({
 
 exports.upload = async (req, res, next) => {
   upload(req, res, (err) => {
-    if (err) return res.status(400).json({ message: err.message });
-
-    if (!req.file)
+    //console.log(JSON.parse(JSON.stringify(req.body)))
+    console.log(req)
+    console.log(Object.assign({}, req.body));
+    console.log(Object.values(req.body))
+    console.log(Object.entries(req.body))
+    if (err) {
+      console.log("error ")
+      return res.status(400).json({ message: err.message });
+    }
+    //console.log(req.body.file)
+    if (!req.body.file){
+      console.log("error file" )
       return res.status(400).json({ message: "Please upload a file" });
+    }
 
+    //console.log("ver body", req.body)
     req.body.photo = req.file.filename;
     Jimp.read(req.file.path, function (err, test) {
       if (err) throw err;
       test
         .scaleToFit(480, Jimp.AUTO, Jimp.RESIZE_BEZIER)
         .quality(50)
-        .write("./public/images/post-images/thumbnail/" + req.body.photo);
+        .write("../public/images/post-images/thumbnail/" + req.body.photo);
       next();
     });
   });
@@ -107,17 +118,18 @@ exports.upload = async (req, res, next) => {
 
 exports.getPosts = (req, res) => {
   let query;
-
+  console.log("if",req.body.initialFetch)
+  console.log("if",req.body.followings)
   if (req.body.initialFetch) {
     query = [
       {
         $facet: {
           posts: [
-            {
+            /*{
               $match: {
                 author: { $in: req.body.followings },
               },
-            },
+            },*/
             { $sort: { createdAt: -1 } },
             { $limit: 5 },
             ...postLookup,
@@ -196,10 +208,11 @@ exports.getPosts = (req, res) => {
 
   Post.aggregate(query)
     .then((data) => {
+      //console.log(data)
       if (req.body.initialFetch && !data[0].total.length) {
         data[0].total.push({ _id: null, count: 0 }); //if user has no posts
       }
-
+      //console.log(data)
       res.status(200).json({ data });
     })
     .catch((err) => {
@@ -444,6 +457,9 @@ exports.getPost = (req, res) => {
 };
 
 exports.createPost = (req, res) => {
+  //console.log(req.body);
+  //console.log(req.body.description);
+  console.log("desc",req.body.photo)
   const hashtags = linkify // find hashtags
     .find(req.body.description)
     .filter((link) => {
