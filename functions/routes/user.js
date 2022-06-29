@@ -88,7 +88,7 @@ router.post(
 router.post(
   "/addProfiePicture",
   checkAuth,
-  userController.upload,
+//  userController.upload,
   userController.changeProfilePicture
 );
 

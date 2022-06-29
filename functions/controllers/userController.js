@@ -75,7 +75,7 @@ exports.upload = (req, res, next) => {
     });
   });
 };
-
+/*
 function deleteProfilePicture({ photo }) {
   fs.unlink("./public/images/profile-picture/" + photo, (err) => {
     if (err) {
@@ -92,23 +92,27 @@ function deleteProfilePicture({ photo }) {
     }
     console.log("removed");
   });
-}
+}*/
 
 exports.changeProfilePicture = (req, res) => {
+  console.log("rud",req.userData)
+  console.log("rb",req.body)
+  const imgbody = JSON.parse(req.body)
   User.findById(req.userData.userId)
     .select("profilePicture")
     .then((data) => {
-      if (data.profilePicture !== "person.png") {
+      /*if (data.profilePicture !== "person.png") {
         deleteProfilePicture({ photo: data.profilePicture });
-      }
+      }*/
 
       User.findOneAndUpdate(
         { _id: req.userData.userId },
-        { profilePicture: req.body.photo },
+        { profilePicture: imgbody.photo },
         { new: true }
       )
         .select("profilePicture")
         .then((user) => {
+          console.log(user)
           return res.status(200).json({ user });
         })
         .catch((err) => {
@@ -456,7 +460,17 @@ exports.sendUserData = (req, res) => {
   }catch (error){
     jsonuser = req.body
   }
+ //console.log(req.body)
   //console.log(req.user)
+//  console.log("ru",req.user)
+ // console.log("rb",req.body)
+ // console.log(req.user.token)
+
+  if (req.user === undefined){
+    return res.status(200).json({ user: req.body });
+  }
+  //console.log("userdata",req.user)
+  //console.log("userbody",req.body)
   return res.status(200).json({ user: req.user });
 };
 
@@ -540,7 +554,8 @@ exports.getUserData = (req, res, next) => {
     jsonuser = req.body
   }
   //console.log("2dasdasd",jsonuser.profilePage)
- 
+ // console.log(req.body)
+ // console.log("ju",jsonuser.profilePage)
   let q;
   if (jsonuser.profilePage) {
     q = [
@@ -693,6 +708,9 @@ exports.followUser = (req, res) => {
     });
 
   // if user follows itself
+  //  console.log("ru",req.userData)
+   // console.log("rbb",req.body)
+
   if (req.userData.userId !== req.body.userId) {
     Following.updateOne(
       {
@@ -794,6 +812,8 @@ exports.getNewUsers = (req, res) => {
 };
 
 exports.getUserProfileData = (req, res, next) => {
+ // console.log("ru",req.userData)
+  //console.log("reqbod",req.body)
   if (req.userData.username === req.body.username) {
     return res.status(200).json({ user: { loggedInUser: true } });
   }
@@ -848,7 +868,10 @@ exports.getUserProfileData = (req, res, next) => {
             ...user[0],
             postsCount,
           };
+          console.log("data",data)
           req.body.user = data;
+          //req.user.loggedInUser = false;
+          req.body.user.loggedInUser = false;
           next();
         })
         .catch((err) => {
@@ -865,6 +888,7 @@ exports.getUserProfileData = (req, res, next) => {
 };
 
 exports.getPosts = (req, res) => {
+  //console.log("gp", req.body)
   Post.aggregate([
     {
       $match: {
@@ -926,6 +950,8 @@ exports.getPosts = (req, res) => {
     },
   ])
     .then((posts) => {
+      //return res.status(200).json({  });
+      //req.body.user.posts = posts;
       return res.status(200).json({ posts });
     })
     .catch((err) => res.status(500).json({ message: err.message }));
@@ -942,10 +968,17 @@ exports.getUserPosts = (req, res, next) => {
   //console.log("upjson",jsonuser.user)
   //console.log("gud",req.user._id)
   //console.log(jsonuser.profilePage)
+  //console.log(req.user)
+  //console.log("rb",req.body)
+  if(req.user === undefined){
+    jsonreq = req.body
+  }else{
+    jsonreq = req
+  }
   if (jsonuser.profilePage) {
     Post.aggregate([
       {
-        $match: { author: mongoose.Types.ObjectId(req.user._id) },
+        $match: { author: mongoose.Types.ObjectId(jsonreq.user._id) },
       },
       { $sort: { createdAt: -1 } },
       { $limit: 10 },
@@ -993,7 +1026,7 @@ exports.getUserPosts = (req, res, next) => {
     ])
       .then((posts) => {
         //console.log("todo ok")
-        req.user.posts = posts;
+        jsonreq.user.posts = posts;
         next();
         //res.send()
       })
@@ -1027,7 +1060,7 @@ exports.searchUsersByUsername = (req, res) => {
 
 exports.getFollowings = (req, res, next) => {
 
-  console.log("ud",req.userData)
+ // console.log("ud",req.userData)
   User.aggregate([
     { $match: { _id: mongoose.Types.ObjectId(req.userData.userId) } },
 

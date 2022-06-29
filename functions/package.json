@@ -25,7 +25,7 @@
     "express-formidable": "^1.2.0",
     "express-rate-limit": "^5.0.0",
     "firebase-admin": "^10.0.2",
-    "firebase-functions": "^3.21.2",
+    "firebase-functions": "^3.22.0",
     "helmet": "^3.16.0",
     "http-errors": "~1.6.2",
     "jimp": "^0.6.8",

@@ -203,7 +203,7 @@ exports.getPosts = (req, res, next) => {
     userId: Joi.objectId().required(),
     lastId: Joi.objectId().required(),
   });
-
+  console.log("dbb",req.body)
   const { error, value } = schema.validate(req.body);
   if (error) {
     return res.status(400).json({ message: error.message });
@@ -216,7 +216,7 @@ exports.getUserProfileData = (req, res, next) => {
     username: Joi.string().min(3).max(30).required(),
     profilePage: Joi.boolean().required(),
   });
-
+  console.log("val", req.body)
   const { error, value } = schema.validate(req.body);
   if (error) {
     return res.status(400).json({ message: error.message });
@@ -228,7 +228,7 @@ exports.getUserProfileFollowers = (req, res, next) => {
   const schema = Joi.object({
     userId: Joi.objectId().required(),
   });
-
+  console.log("fllers",req.body)
   const { error, value } = schema.validate(req.body);
   if (error) {
     return res.status(400).json({ message: error.message });
@@ -328,10 +328,11 @@ exports.followUser = (req, res, next) => {
   const schema = Joi.object({
     userId: Joi.objectId().required(),
   });
-
+  console.log(req.body)
   const { error, value } = schema.validate(req.body);
   if (error) {
     return res.status(400).json({ message: error.message });
   }
+
   next();
 };
